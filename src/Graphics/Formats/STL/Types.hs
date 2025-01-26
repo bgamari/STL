@@ -10,7 +10,9 @@ module Graphics.Formats.STL.Types
 
 import           Control.Monad
 import qualified Data.ByteString as BS
-import           Data.Serialize
+import           Data.Binary
+import           Data.Binary.Get
+import           Data.Binary.Put
 import           Data.Text (Text)
 import qualified Data.Text as T
 import           Data.Text.Encoding
@@ -37,12 +39,12 @@ triple a b c = (a, b, c)
 -- Binary Output
 --------------------------------------------------------------------------------
 
-instance Serialize Triangle where
+instance Binary Triangle where
     get = Triangle <$> getNormal <*> t <* skip 2 where
       t = (,,) <$> getVector <*> getVector <*> getVector
     put (Triangle n (a, b, c)) = maybeNormal n *> v3 a *> v3 b *> v3 c *> put (0x00 :: Word16)
 
-instance Serialize STL where
+instance Binary STL where
     get = do
         _  <- getHeader
         ct <- getWord32le
@@ -60,12 +62,12 @@ header n = BS.concat [lib, truncatedName, padding] where
 -- header _ = BS.replicate 72 0x20 -- cereal adds 8 bytes giving the length of the BS
 
 putFloat :: Float -> Put
-putFloat = putFloat32le
+putFloat = putFloatle
 
-v3 :: Vector -> PutM ()
+v3 :: Vector -> Put
 v3 (x,y,z) = putFloat x *> putFloat y *> putFloat z
 
-maybeNormal :: Maybe Vector -> PutM ()
+maybeNormal :: Maybe Vector -> Put
 maybeNormal n = case n of
     Nothing -> v3 (0,0,0)
     Just n' -> v3 n'
@@ -74,7 +76,7 @@ getHeader :: Get ()
 getHeader = skip 80
 
 getFloat :: Get Float
-getFloat = getFloat32le
+getFloat = getFloatle
 
 getVector :: Get Vector
 getVector = (,,) <$> getFloat <*> getFloat <*> getFloat
