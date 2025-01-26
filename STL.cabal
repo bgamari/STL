@@ -27,10 +27,11 @@ Source-repository head
 
 library
   exposed-modules:  Graphics.Formats.STL,
-                    Graphics.Formats.STL.Types,
+                    Graphics.Formats.STL.ASCII,
+                    Graphics.Formats.STL.Binary,
                     Graphics.Formats.STL.Parser,
                     Graphics.Formats.STL.Printer,
-                    Graphics.Formats.STL.Binary
+                    Graphics.Formats.STL.Types
   -- other-modules:
   -- other-extensions:
   build-depends:    base >=4.8 && <4.23,
